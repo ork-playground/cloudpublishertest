@@ -1,0 +1,110 @@
+﻿@inherits RazorFunction
+@using Orckestra.Composer.Search.ViewModels
+@using Orckestra.Composer.Search.Facets
+@using Newtonsoft.Json
+
+@functions {
+    public override string FunctionDescription
+    {
+        get { return "Base Selected Facets"; }
+    }
+
+    [FunctionParameter(Label = "", Help = "")]
+    public FacetSettingsViewModel FacetSettings { get; set; }
+
+    [FunctionParameter(Label = "", Help = "", DefaultValue = null)]
+    public List<string> LandingPageUrls { get; set; }
+
+    [FunctionParameter(Label = "", Help = "", DefaultValue = null)]
+    public ProductSearchResultsViewModel ProductSearchVM { get; set; }
+
+    
+    public SelectedSortBy SelectedSortBy { 
+        get {
+            return ProductSearchVM.SelectedSortBy;
+        }
+    }
+
+    
+    public IList<SortBy> AvailableSortBys { 
+        get {
+            return ProductSearchVM.AvailableSortBys;
+        }
+    }
+
+    
+    public long TotalCount { 
+        get {
+            return ProductSearchVM.TotalCount;
+        }
+    }
+
+    public SelectedFacets SelectedFacets
+    {
+        get
+        {
+            return FacetSettings?.SelectedFacets;
+        }
+    }
+
+    public string FirstLandingPageUrl
+    {
+        get
+        {
+            return LandingPageUrls != null ? LandingPageUrls[0] : "";
+        }
+    }
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0" xmlns:v-bind="v-bind" xmlns:v-on="v-on">
+<head>
+</head>
+<body>
+    <div data-oc-controller="Product.SelectedSearchFacets" 
+         data-context="@JsonConvert.SerializeObject(SelectedFacets, new Newtonsoft.Json.Converters.StringEnumConverter())" 
+         data-landingpageurls="@JsonConvert.SerializeObject(LandingPageUrls)"
+         data-available-sort="@JsonConvert.SerializeObject(AvailableSortBys, new Newtonsoft.Json.Converters.StringEnumConverter())"
+         data-selected-sort="@JsonConvert.SerializeObject(SelectedSortBy, new Newtonsoft.Json.Converters.StringEnumConverter())"
+         data-items-count="@(TotalCount)"
+         id="vueSelectedSearchFacets" v-cloak="true">
+        <div class="card facets-card selected-facets"
+            v-bind:class="{'d-lg-none' : !Facets.length}">
+            <div class="card-header">
+                @Html.Localize("List-Search", "L_Selection")
+                <a v-if="IsAllRemovable" 
+                   class="float-right"
+                   data-qa="search-refiners-clear-all"
+                   v-on:click="clearSelectedFacets(@FirstLandingPageUrl)">
+                    @Html.Localize("List-Search", "B_ClearAll")
+                </a>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li v-for="(facet, index) in Facets"
+                        class="list-group-item d-flex justify-content-between align-items-center"
+                        v-bind:class="{'disabled': !facet.IsRemovable}">
+                        <span v-html="facet.DisplayName"></span>
+                        <span class="badge badge-light">
+                            <a v-if="facet.IsRemovable"
+                               class="float-right" data-qa="search-refiner-remove"
+                               v-on:click="removeSelectedFacet(facet, index)"
+                               v-bind:title="facet.DisplayName">
+                                <span class="fa  fa-times"></span>
+                            </a>
+                            <span v-else="v-else" class="float-right  fa  fa-times text-muted"></span>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row filters-row mb-4 mt-3 d-lg-none" v-if="TotalCount > 0">
+            <div class="col-6">
+                @FacetHelpers.FacetsModalCollapseBtn()
+            </div>
+            <div class="col-6">
+                @FacetHelpers.SortBy()
+            </div>
+        </div>
+    </div>
+</body>
+</html>

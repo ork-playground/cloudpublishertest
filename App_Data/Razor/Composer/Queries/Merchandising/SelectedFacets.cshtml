@@ -1,0 +1,34 @@
+﻿@inherits Composer.Razor.ComposerRazorFunction
+@using Orckestra.Overture.ServiceModel.SearchQueries
+@using Orckestra.Composer.SearchQuery.Context
+@using Orckestra.Composer.SearchQuery.ViewModels
+@using Orckestra.Composer.Search.ViewModels
+
+@functions {
+    public override string FunctionDescription
+    {
+        get { return "Query Browsing Selected Facets"; }
+    }
+
+    [FunctionParameter(Label = "Query Name", Help = "Query Name", WidgetMarkup = Orckestra.ExperienceManagement.SearchQueryBuilder.Widgets.MerchandisingQuerySelector)]
+    public string QueryName { get; set; }
+
+    public ISearchQueryContext RequestContext { get; set; }
+}
+
+@{
+    SearchQueryViewModel browsingViewModel = RequestContext.GetSearchQueryViewModelAsync("Merchandising", QueryName).Result;
+    if (browsingViewModel == null)
+    {
+        return;
+    }
+    ProductSearchResultsViewModel productSearchVM = browsingViewModel.ProductSearchResults;
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0">
+<head>
+</head>
+<body>
+    @Function("Composer.Search.BaseSelectedFacets", new { FacetSettings = browsingViewModel.FacetSettings, ProductSearchVM = productSearchVM })
+</body>
+</html>

@@ -1,0 +1,246 @@
+﻿@inherits Composer.Razor.ComposerRazorFunction
+@using Orckestra.Composer.Search.Context
+@using Orckestra.Composer.Search.ViewModels
+@using Orckestra.Search.WebsiteSearch;
+@using Composite.Core.Routing.Pages;
+@using Orckestra.Composer.Search.RequestConstants
+@using Orckestra.Composer.Search
+@using Orckestra.Composer.ContentSearch.Services
+@using Orckestra.Composer.ContentSearch.Parameters
+@using Orckestra.Composer.ContentSearch.ViewModels
+@using Orckestra.Composer.ContentSearch.DataTypes
+@using Newtonsoft.Json
+
+@functions {
+    public override string FunctionDescription
+    {
+        get { return "Search Results with Content Tabs"; }
+    }
+
+    [FunctionParameter(Label = "${Orckestra.Search.WebsiteSearch,SearchResults.CurrentSite.Label}", Help = "${Orckestra.Search.WebsiteSearch,SearchResults.CurrentSite.Help}", DefaultValue = true)]
+    public bool CurrentSite { get; set; }
+
+    [FunctionParameter(Label = "${Orckestra.Search.WebsiteSearch,SearchResults.ShowHighlights.Label}", Help = "${Orckestra.Search.WebsiteSearch,SearchResults.ShowHighlights.Help}", DefaultValue = false)]
+    public bool ShowHighlights { get; set; }
+
+    public ISearchRequestContext SearchRequestContext { get; set; }
+    public IContentSearchViewService ContentSearchViewService { get; set; }
+
+    public SearchViewModel ProductsSearchViewModel => SearchRequestContext.ProductsSearchViewModel;
+    public ProductSearchResultsViewModel ProductSearchResults => ProductsSearchViewModel.ProductSearchResults;
+
+    private bool IsProductsCorrected()
+    {
+        return !string.IsNullOrEmpty(ProductSearchResults.CorrectedSearchTerms) && ProductSearchResults.TotalCount > 0;
+    }
+
+    private bool IsProductFacetsSelected()
+    {
+        return ProductsSearchViewModel != null && ProductsSearchViewModel.FacetSettings.SelectedFacets != null
+            && ProductsSearchViewModel.FacetSettings.SelectedFacets.Facets.Count > 0;
+    }
+}
+
+@{
+    if (string.IsNullOrWhiteSpace(SearchRequestContext.SearchQuery)) { return; }
+
+    C1PageRoute.RegisterPathInfoUsage();
+    string pathInfo = C1PageRoute.GetPathInfo();
+    string currentTabPathInfo = pathInfo?.Split('/')[1];
+
+    var productTab = Data.Get<IContentTab>().FirstOrDefault(t => t.IsProductTab);
+    var isProductTab = (productTab != null && (currentTabPathInfo == null || productTab.UrlTitle == currentTabPathInfo));
+    SearchRequestContext.IsProductsSearchActive = isProductTab;
+
+    var contentSearchVm = ContentSearchViewService.GetContentSearchViewModel(new GetContentSearchParameter
+    {
+        Culture = Data.CurrentLocale,
+        PageSize = SearchConfiguration.MaxItemsPerPage,
+        CurrentPage = SearchRequestContext.CurrentPage,
+        PathInfo = currentTabPathInfo,
+        CurrentSiteOnly = CurrentSite,
+        SearchQuery = SearchRequestContext.SearchQuery,
+        IsCorrectedSearchQuery = IsProductsCorrected(),
+        CorrectedSearchQuery = ProductSearchResults.CorrectedSearchTerms,
+        QueryKeys = Request.QueryString?.AllKeys,
+        ProductsTabActive = isProductTab,
+        SortBy = SearchRequestContext.SortBy,
+        SortDirection = SearchRequestContext.SortDirection
+    });
+
+    var justProductsSearch = contentSearchVm == null;
+
+    if (justProductsSearch)
+    {
+        @Function("Composer.Search.Summary")
+        @ShowProductsSearchResults()
+        return;
+    }
+
+    if (currentTabPathInfo == null)
+    {
+        currentTabPathInfo = productTab != null ? productTab.UrlTitle : contentSearchVm.Tabs.First()?.UrlTitle;
+    }
+
+    if (productTab != null)
+    {
+        var productTabVm = new ContentSearchTabViewModel
+        {
+            Title = productTab.Title,
+            UrlTitle = productTab.UrlTitle,
+            TabUrl = $"{CurrentPageNode.Url}/{productTab.UrlTitle}?{SearchRequestParams.Keywords}={HttpUtility.UrlEncode(SearchRequestContext.SearchQuery)}",
+            Total = IsProductsCorrected() && !isProductTab ? 0 : ProductSearchResults.TotalCount,
+            IsActive = (productTab != null && currentTabPathInfo == null) || (productTab != null && productTab.UrlTitle == currentTabPathInfo),
+            IsProducts = true
+        };
+
+        contentSearchVm.Tabs.Insert(0, productTabVm);
+    }
+
+    var currentTab = contentSearchVm.ActiveTab;
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0" xmlns:v-bind="v-bind" xmlns:v-on="v-on">
+<head>
+</head>
+<body>
+    @SearchSummary(contentSearchVm, isProductTab)
+
+    <div>
+        <!-- Tab panes -->
+        <div class="tab-content mt-4">
+            @if (currentTab != null)
+            {
+                if (currentTab.Total == 0)
+                {
+                    <div id="vueTabSearchSummary">
+                        <template v-if="CurrentTab.Total == 0">
+                            <p>@Html.Localized("List-Search", "WeAreSorry", "{{SearchQuery}}", currentTab.Title)</p>
+                            @ShowButWeFindIn("TabsWithResults")
+                            @ShowButWeFindInTeaser()
+                        </template>
+                    </div>
+                }
+
+                if (isProductTab)
+                {
+                    @ShowProductsSearchResults()
+                }
+                else
+                {
+                    <f:function name="Composer.Grids.SearchGrid">
+                        <f:param name="LeftPart">
+                            @Function("Composer.ContentSearch.Facets", new { Results = contentSearchVm, CurrentSite = CurrentSite })
+                        </f:param>
+                        <f:param name="RightPart">
+                            @Function("Composer.ContentSearch.Results", new
+                            {
+                                SelectedSortBy = contentSearchVm.SelectedSortBy,
+                                AvailableSortBys = contentSearchVm.AvailableSortBys,
+                                Tab = contentSearchVm.ActiveTab,
+                                CurrentSite = CurrentSite
+                            })
+                        </f:param>
+                    </f:function>
+                }
+            }
+        </div>
+    </div>
+</body>
+</html>
+
+@helper SearchSummary(ContentSearchViewModel vm, bool isProductTab)
+{
+    <div data-oc-controller="Product.SearchSummary" id="vueSearchSummary"
+         data-context="@JsonConvert.SerializeObject(vm.Tabs)"
+         data-isProductTab="@isProductTab"
+         data-сorrectedSearchTerms="@ProductSearchResults.CorrectedSearchTerms"
+         data-productsTotal="@ProductSearchResults.TotalCount"
+         data-searchQuery="@SearchRequestContext.SearchQuery"
+         data-suggestedTabs="@JsonConvert.SerializeObject(vm.SuggestedTabs)"
+         data-total="@vm.Total"
+         v-cloak="true"
+         class="sps sps--abv">
+        <div class="container-md">
+            <template v-if="IsProductsCorrected">
+                <h2>@Html.Localized("List-Search", "L_NoResultsFor", "{{SearchQuery}}")</h2>
+                <p class="m-0">@Html.Localized("List-Search", "WeAreSorry", "{{SearchQuery}}", vm.ActiveTab?.Title)</p>
+                @ShowButWeFindIn("SuggestedTabs")
+                <h1 class="mt-4">@(Html.Localized("List-Search", "L_SearchResultsCorrected", "{{TotalCount}}", "{{CorrectedSearchTerms}}"))</h1>
+            </template>
+            <template v-else="v-else">
+                <h1 v-if="TotalCount > 0">
+                    <strong v-if="Loading">@GeneralHelpers.LoadingSpinner()</strong>   <strong v-else="else">{{TotalCount}}</strong>
+                    @Html.Localized("List-Search", "L_SearchResults", "{{SearchQuery}}")
+                </h1>
+                <h1 v-else="v-else">@Html.Localized("List-Search", "L_NoResultsFor", "{{SearchQuery}}")</h1>
+                @Function("Composer.Search.Suggestions")
+            </template>
+        </div>
+
+        <div v-if="Tabs?.length" class="container-fluid search-tabs bg-light  pt-2">
+            <div class="container-md">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li v-for="tab in Tabs" role="presentation" class="nav-item">
+                        <a v-bind:href="tab.TabUrl" class="nav-link" v-bind:class="{ active: tab.IsActive }">
+                            {{tab.Title}} ({{tab.Total}})
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+@helper ShowButWeFindIn(string vueBinding = "TabsWithResults")
+{
+    <p v-if="@(vueBinding).length > 0">
+        @Html.Localize("List-Search", "ButWeFind_Part1")
+        <span v-for="(tab, index) in @(vueBinding)">
+            <a v-bind:href="tab.TabUrl">{{tab.Title}} ({{tab.Total}})</a>
+            <span v-if="index != (@(vueBinding).length -1)">
+                @Html.Localize("List-Search", "ButWeFind_Separator")
+            </span>
+        </span>
+        @Html.Localized("List-Search", "ButWeFind_Part2", "{{SearchQuery}}")
+    </p>
+}
+
+@helper ShowButWeFindInTeaser()
+{
+    <div class="content-tab-teaser">
+        <div class="header" v-for="tab in TabsWithResults" v-if="tab.SearchResults">
+
+            <h3 class="title d-inline-flex  mt-3">@Html.Localized("List-Search", "T_SearchResultsFoundIn", "{{tab.Title}}", "{{tab.Total}}")</h3>
+            <a v-if="tab.Total > 3" class="d-inline-flex  ml-4" v-bind:href="tab.TabUrl">@Html.Localized("List-Search", "L_SearchResultsSeeAll", "{{tab.Title}}")</a>
+            <div class="row">
+                <div v-for="(contentItem, index) in tab.SearchResults.slice(0, 3)" class="col-12 col-sm-4 mb-4">
+                    @ContentSearchHelpers.ContentSearchEntry()
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@helper ShowProductsSearchResults()
+{
+    if (ProductSearchResults.TotalCount == 0 && !IsProductFacetsSelected())
+    {
+        return;
+    }
+    <f:function name="Composer.Grids.SearchGrid">
+        <f:param name="LeftPart">
+            <html>
+            <head>
+            </head>
+            <body>
+                <f:function name="Composer.Search.SelectedFacets"></f:function>
+                <f:function name="Composer.Search.Facets"></f:function>
+            </body>
+        </html>
+    </f:param>
+    <f:param name="RightPart">
+        @Function("Composer.Search.BaseSearchResults", new { Results = ProductsSearchViewModel })
+    </f:param>
+</f:function>
+}

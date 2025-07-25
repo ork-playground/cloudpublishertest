@@ -1,0 +1,30 @@
+﻿@inherits RazorFunction
+@using Composite.Core
+@using Orckestra.Composer.Services
+
+@functions {
+    public override string FunctionDescription
+    {
+        get { return "The Organization JSON-LD SEO Data"; }
+    }
+
+    public IWebsiteContext WebsiteContext { get; set; }
+}
+
+@{
+    var organization = WebsiteContext.GetRootPageMetaData<Orckestra.Composer.SEO.Organization>();
+    if (organization == null)
+    {
+        return;
+    }
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0">
+<head>
+    <script type="application/ld+json">
+    @(organization.JSONLD)
+    </script>
+</head>
+<body>
+</body>
+</html>

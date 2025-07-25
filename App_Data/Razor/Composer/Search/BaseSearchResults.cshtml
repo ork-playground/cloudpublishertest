@@ -1,0 +1,81 @@
+﻿@inherits Composer.Razor.ComposerRazorFunction
+@using Orckestra.Composer.Search.Context;
+@using Orckestra.Composer.Search.ViewModels;
+@using Newtonsoft.Json
+
+@functions {
+    [FunctionParameter(Label = "", Help = "")]
+    public BaseSearchViewModel Results { get; set; }
+
+    [FunctionParameter(Label = "", Help = "", DefaultValue = true)]
+    public bool ShowPagination { get; set; }
+
+    private const string rowNumSelectWidget = @" <f:widgetfunction xmlns:f='http://www.composite.net/ns/function/1.0' name='Composite.Widgets.String.Selector'>
+    <f:param name='Options'>
+       <f:function name='Composite.Utils.String.Split'>
+            <f:param name='int' value='1,2,3,4,6,12' />
+       </f:function>
+      </f:param>
+     </f:widgetfunction>";
+
+    [FunctionParameter(Label = "", Help = "", WidgetMarkup = rowNumSelectWidget, DefaultValue = 3)]
+    public int ProductRowNum { get; set; }
+}
+@{
+    string vueId = "vueSearchResults" + Guid.NewGuid().ToString("N");
+    string colNum = "";
+    switch(ProductRowNum)
+    {
+        case 1:
+            colNum = "12";
+            break;
+        case 2:
+            colNum = "6";
+            break;
+        case 3:
+            colNum = "4";
+            break;
+        case 4:
+            colNum = "3";
+            break;
+        case 6:
+            colNum = "2";
+            break;
+        case 12:
+            colNum = "1";
+            break;
+    }
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0" xmlns:v-bind="v-bind" xmlns:v-on="v-on">
+<head>
+</head>
+<body>
+    <div data-oc-controller="Product.SearchResults"
+         data-context="@JsonConvert.SerializeObject(Results, new Newtonsoft.Json.Converters.StringEnumConverter())"
+         data-vueid="@vueId"
+         id="@vueId"
+         v-cloak="true"
+         class="search-results">
+        <div class="overlay" v-if="isLoading"></div>
+        @if (ShowPagination)
+        {
+            <div class="row filters-row mb-4 d-none d-lg-flex" v-if="TotalCount > 0">
+                <div class="col-6">
+                    @SearchHelpers.SortBy()
+                </div>
+                <div class="col-6">
+                    @SearchHelpers.PaginationDropdown()
+                </div>
+            </div>
+        }
+        <template v-if="TotalCount > 0">
+            <div class="row">
+                <div v-for="(Product, index) in SearchResultsData" class="col-12 col-sm-6  col-md-@colNum  col-xl-@colNum product-col-container" data-qa="search-results" v-bind:key="Product.ProductId + Product.VariantId">
+                    @Function("Composer.Search.Products.ProductTileVue")
+                </div>
+            </div>
+        </template>
+    </div>
+</body>
+</html>

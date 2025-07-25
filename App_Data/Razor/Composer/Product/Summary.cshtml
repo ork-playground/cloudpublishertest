@@ -1,0 +1,182 @@
+﻿@inherits Composer.Razor.ComposerRazorFunction
+@using Orckestra.Composer.CompositeC1.Context
+@using Orckestra.Composer.Product.ViewModels
+
+@functions {
+    public override string FunctionDescription
+    {
+        get { return "Product Summary"; }
+    }
+    public IProductContext ProductContext { get; set; }
+    public new ProductViewModel Model { get { return ProductContext.ViewModel; } }
+
+
+    public string SelectedVariantClass(params string[] ids)
+    {
+        return ids.Contains(Model.SelectedVariantId) ? "" : "d-none";
+    }
+
+    public bool IsWithoutVariants()
+    {
+        return Model.Variants == null || Model.Variants.Count == 0;
+    }
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0">
+<head>
+    <script type="text/javascript">
+        var productDetailContext = @HttpUtility.JavaScriptStringEncode(Model.JsonContext, true);
+    </script>
+</head>
+<body>
+    <div data-oc-controller="Product.ProductDetail"
+         data-productid="@Model.ProductId"
+         data-context-var="productDetailContext"
+         class="product-details">
+        <div class="row">
+            <div id="product-gallery" class="col-md-7 col-lg-8 @(Model.Images.Count > 1 ? "mobile-carousel-container" : "")">
+                @Partial("Product", "ImagesLargeGallery", Model)
+            </div>
+            <div class="mobile-carousel-thumbnails  @(Model.Images.Count > 1 ? "" : "d-none") d-md-none">
+                @Partial("Product", "ThumbsGallery", Model)
+            </div>
+            <div class="col-md-5 col-lg-4">
+
+                @ProductHelpers.AddToWishList()
+                @BrandName()
+
+                @DisplayName()
+
+                @Description()
+
+                @Sku()
+
+                @KvaList()
+
+                @Html.LazyFunction("Composer.Product.RecurringFrequency")
+
+                <div class="mb-4" property="offers" typeof="Offer">
+                    @Partial("PriceDiscount", Model)
+                </div>
+
+                <div class="mb-4">
+                    @ProductHelpers.AddToCartWithQuantity(true)
+                </div>
+
+                @StoreInventoryLink()
+
+                @Function("Composer.Product.Specifications")
+            </div>
+        </div>
+
+    </div>
+
+    @if (Model.IsProductZoomEnabled)
+    {
+        @Partial("Product", "Zoom", Model)
+    }
+
+</body>
+</html>
+
+@helper DisplayName()
+{
+    if (IsWithoutVariants())
+    {
+        <h1>@Model.DisplayName</h1>
+    }
+    else
+    {
+        <h1>
+        @{
+            var displayNames = Model.Variants.GroupBy(v => v.DisplayName).ToList();
+            if (displayNames.Count() > 1) {
+                foreach (var group in displayNames)
+                {
+                    var ids = group.Select(v => v.Id).ToArray();
+                    <span data-variant="@(String.Join(",", ids))" class="@SelectedVariantClass(ids)">@group.Key</span>
+                }
+            }
+            else {
+                var group = displayNames.FirstOrDefault();
+                var ids = group.Select(v => v.Id).ToArray();
+                <span class="single">@group.Key</span>
+            }
+        }
+       </h1>
+    }
+}
+
+@helper Description()
+{
+<div class="mb-4" property="description">
+    @HttpUtility.HtmlDecode(Model.Description)
+</div>
+}
+
+@helper Sku()
+{
+    <span class="d-none" property="sku">@Model.Sku</span>
+}
+
+@helper BrandName()
+{
+    <h2 class="h5  mb-1" property="brand" data-qa="product-brand">@HttpUtility.HtmlDecode(Model.Brand)</h2>
+}
+
+@helper StoreInventoryLink()
+{
+    <div class="mb-4">
+        <div class="row">
+            <div class="col-12 col-lg-7">
+                <a class="btn btn-outline-default btn-block mb-4 relative" href="#storeinventory">
+                    <i class="fa  fa-store"></i>&#160;
+                    @Html.Localize("Store", "H_StoreAvailability")
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+@helper KvaList()
+{
+    <div id="vueKvaList" v-cloak="true" xmlns:v-bind="v-bind" xmlns:v-on="v-on">
+        <div class="mb-3"  
+            data-qa="product-variants"
+            v-for="values in KvaAttributeItems"  
+            v-bind:data-propertyname="values.PropertyName" 
+            v-bind:data-propertydatatype="values.PropertyDataType">   
+            
+            <h5 class="font-weight-bold">{{values.DisplayName}}</h5>
+            <div class="kva-list variant-kva" v-if="values.PropertyName == 'Colour'">
+                <div class="kva-color btn-sm" 
+                    v-for="value in values.Values"
+                    v-bind:class="{ disabled : value.Disabled, active : value.Selected }"
+                    v-bind:value="value.Value"
+                    v-bind:disabled="value.Disabled"
+                    v-bind:title="value.Title"
+                    v-on:click="changeKva">
+                    <div class="kva-color-value" 
+                        v-bind:style="KvaColorStyle(value)"
+                        data-toggle="popover" 
+                        data-placement="top" 
+                        data-trigger="hover" 
+                        v-bind:data-content="value.Title"
+                        v-on:mouseover="onMouseover"
+                        v-on:mouseleave="onMouseleave"></div>
+                </div>
+            </div>
+            <div class="kva-list variant-kva" v-else="v-else">
+                <button class="kva-property btn btn-sm"
+                    v-for="value in values.Values"
+                    v-bind:class="{ disabled : value.Disabled, 'btn-primary' : value.Selected, 'btn-outline-secondary' : !value.Selected  }"
+                    v-bind:value="value.Value"
+                    v-on:click="changeKva">
+                    <span class="kva-property-value">
+                        {{value.Title}}
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+}

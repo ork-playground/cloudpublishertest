@@ -1,0 +1,17 @@
+﻿@model IEnumerable<Orckestra.ExperienceManagement.AppSelector.ViewModels.ApplicationViewModel>
+<div class="application-selector">
+    <div class="application-selector-header">
+        <ui:text label="${string:Orckestra.ExperienceManagement.Branding:Application.List.Title}"></ui:text>
+    </div>
+    <div class="applications-wrapper">
+        @foreach (var app in Model)
+        {
+            <a href="@app.ApplicationUrl" target="_blank" class="application @(app.IsCurrent ? "current" : "")">
+                <img alt="icon" src="@app.IconUrl" />
+                <span class="text">
+                    @app.Label
+                </span>
+            </a>
+        }
+    </div>
+</div>

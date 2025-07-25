@@ -1,0 +1,81 @@
+﻿@inherits RazorFunction
+
+@functions {
+    public override string FunctionDescription
+    {
+        get { return "Header of the page."; }
+    }
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://www.composite.net/ns/function/1.0">
+<head>
+</head>
+<body>
+    <header class="masthead masthead-with-mega-menu shadow-sm-none sps sticky-top bg-white">
+        <div class="header">
+            <nav class="navbar navbar-expand navbar-light bg-white p-sm-0 px-2 py-0">
+                <div class="container-md">
+                    <div class="mobile-logo d-lg-none">
+                        <a href="@HomePageNode.Url">
+                            <img src="~/UI.Package/Images/better-retail.png" alt="logo" class="d-block" />
+                        </a>
+                    </div>
+
+                    <button class="navbar-toggler d-block d-lg-none main-nav-toggle"
+                            aria-label="Menu"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#main-nav-collapse"
+                            aria-expanded="false">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    @Function("Composer.Header.LanguageSwitсh")
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            @Function("Composer.Store.LocatorInHeader")
+                        </li>
+                        @Function("Composer.Membership.SignInHeader")
+                        <li class="nav-item d-none d-md-block">
+                            @Function("Composer.WishList.WishListInHeader")
+                        </li>
+                        <li class="nav-item d-block d-lg-none">
+                            @Function("Composer.Cart.MinicartButtonMobile")
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        @Function("Composer.Header.MainMenu")
+
+        <div class="search-bar container-fluid bg-white">
+            <div class="container-md">
+                <div class="row justify-content-between mobile-menu">
+                    <div class="col-10 col-lg-4 mx-auto mx-lg-0 justify-content-center align-self-center d-none d-lg-block text-md-center text-lg-left">
+                        @Logo()
+                    </div>
+
+                    <div class="col-12 col-md-9 col-lg-6  justify-content-center align-self-center">
+                        <f:function xmlns:f="http://www.composite.net/ns/function/1.0" name="Composer.SearchBox">
+                            <f:param name="Autocomplete" value="true" />
+                        </f:function>
+                    </div>
+                    <div class="col-3 col-lg-2 justify-content-center align-self-center d-none d-md-block">
+                        @Function("Composer.Cart.MinicartButton")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <f:function xmlns:f="http://www.composite.net/ns/function/1.0" name="Composer.Header.EditOrderBanner" />
+    </header>
+</body>
+</html>
+
+@helper Logo()
+{
+    <a href="@HomePageNode.Url" class="logo">
+        <img src="~/UI.Package/Images/better-retail.png" alt="logo" />
+    </a>
+}
+

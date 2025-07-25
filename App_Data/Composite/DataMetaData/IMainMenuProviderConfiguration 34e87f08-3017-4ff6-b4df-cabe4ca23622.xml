@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DataTypeDescriptor dataTypeId="34e87f08-3017-4ff6-b4df-cabe4ca23622" name="IMainMenuProviderConfiguration" namespace="Orckestra.Composer.CompositeC1.DataTypes.Navigation" title="External Main Menu Items Provider Configuration" isCodeGenerated="false" cachable="false" searchable="false" labelFieldName="Provider" typeManagerTypeName="Orckestra.Composer.CompositeC1.DataTypes.Navigation.IMainMenuProviderConfiguration,Orckestra.Composer.CompositeC1.DataTypes">
+  <DataAssociations />
+  <DataScopes>
+    <DataScopeIdentifier name="public" />
+  </DataScopes>
+  <KeyPropertyNames>
+    <KeyPropertyName name="Id" />
+  </KeyPropertyNames>
+  <SuperInterfaces>
+    <SuperInterface type="Composite.Data.IPageDataFolder,Composite" />
+    <SuperInterface type="Composite.Data.IPageRelatedData,Composite" />
+  </SuperInterfaces>
+  <Fields>
+    <DataFieldDescriptor id="3cb8d836-9d2d-41d8-984a-abec4349356a" name="Id" isNullable="false" position="0" groupByPriority="0" inherited="false" instanceType="System.Guid, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='Guid'" isReadOnly="false" newInstanceDefaultFieldValue="&lt;f:function name=&quot;Composite.Utils.Guid.NewGuid&quot; xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; /&gt;">
+      <FormRenderingProfile />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="e50b9c2d-9a19-49c2-ad5c-19ada3ac9acd" name="Provider" isNullable="false" position="0" groupByPriority="0" inherited="false" instanceType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='String'Length='64'" isReadOnly="false" defaultValue="ValueType='String'Value=''">
+      <FormRenderingProfile widgetFunctionMarkup="&lt;f:widgetfunction xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Composite.Widgets.Selector&quot;&gt;&lt;f:param xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Options&quot;&gt;&lt;f:function xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Orckestra.Composer.CompositeC1.Widgets.WidgetFunctions.GetMainMenuProviderNames&quot; /&gt;&lt;/f:param&gt;&lt;/f:widgetfunction&gt;" />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="d18a7e45-2a98-47c7-9611-abee742d9b29" name="ParentPage" isNullable="true" position="1" groupByPriority="0" inherited="false" instanceType="&lt;t n=&quot;System.Nullable`1, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089&quot;&gt;&#xD;&#xA;  &lt;t n=&quot;System.Guid, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089&quot; /&gt;&#xD;&#xA;&lt;/t&gt;" storeType="PhysicalStoreType='Guid'" isReadOnly="false" foreignKeyReferenceTypeName="Composite.Data.Types.IPage,Composite">
+      <FormRenderingProfile label="Parent Page " helpText="If present, then will be used as parent navigation item" />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="8b7f1074-4495-4d40-adf8-da08a43757fe" name="Order" isNullable="false" position="2" groupByPriority="0" inherited="false" instanceType="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='Integer'" isReadOnly="false" newInstanceDefaultFieldValue="&lt;f:function xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Composite.Constant.Integer&quot;&gt;&lt;f:param name=&quot;Constant&quot; value=&quot;1&quot; /&gt;&lt;/f:function&gt;" defaultValue="ValueType='Integer'Value='0'">
+      <FormRenderingProfile label="Display Order" helpText="Specifies the position of this menu item in the menu." />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="f641ec01-75bb-49ec-b02a-969d6be59a5f" name="PageId" isNullable="false" position="1000" groupByPriority="0" inherited="true" instanceType="System.Guid, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='Guid'" isReadOnly="false" foreignKeyReferenceTypeName="Composite.Data.Types.IPage,Composite">
+      <FormRenderingProfile />
+    </DataFieldDescriptor>
+  </Fields>
+</DataTypeDescriptor>

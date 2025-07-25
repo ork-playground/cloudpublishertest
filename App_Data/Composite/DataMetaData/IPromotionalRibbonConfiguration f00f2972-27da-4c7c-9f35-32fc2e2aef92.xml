@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DataTypeDescriptor dataTypeId="f00f2972-27da-4c7c-9f35-32fc2e2aef92" name="IPromotionalRibbonConfiguration" namespace="Orckestra.Composer.CompositeC1.DataTypes" title="PromotionalRibbon" isCodeGenerated="false" cachable="false" searchable="false" labelFieldName="LookupValue" typeManagerTypeName="Orckestra.Composer.CompositeC1.DataTypes.IPromotionalRibbonConfiguration,Orckestra.Composer.CompositeC1.DataTypes">
+  <DataAssociations />
+  <DataScopes>
+    <DataScopeIdentifier name="public" />
+  </DataScopes>
+  <KeyPropertyNames>
+    <KeyPropertyName name="Id" />
+  </KeyPropertyNames>
+  <SuperInterfaces />
+  <Fields>
+    <DataFieldDescriptor id="7ad1a538-a357-40dc-b8df-332021f5a213" name="Id" isNullable="false" position="0" groupByPriority="0" inherited="false" instanceType="System.Guid, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='Guid'" isReadOnly="false" newInstanceDefaultFieldValue="&lt;f:function name=&quot;Composite.Utils.Guid.NewGuid&quot; xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; /&gt;">
+      <FormRenderingProfile />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="01f8fdbb-87cc-4bce-8da1-ac58dfb0781b" name="LookupValue" isNullable="false" position="0" groupByPriority="0" inherited="false" instanceType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='String'Length='16'" isReadOnly="false" defaultValue="ValueType='String'Value=''">
+      <FormRenderingProfile label="Promotional Ribbon Lookup Value" helpText="Specify the value which equals to the Promotional Ribbon lookup value you want to configure." />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="52129127-4367-4751-a86c-465db9f09419" name="BackgroundColor" isNullable="false" position="1" groupByPriority="0" inherited="false" instanceType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='String'Length='64'" isReadOnly="false" defaultValue="ValueType='String'Value=''">
+      <FormRenderingProfile label="Background Color" helpText="If none is selected, then default Dark backgroud is used." widgetFunctionMarkup="&lt;f:widgetfunction xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Composite.Widgets.String.Selector&quot;&gt;&lt;f:param xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Options&quot;&gt;&lt;f:function xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Orckestra.Web.Html.GetStyleOptionsFromFile&quot;&gt;&lt;f:param name=&quot;OptionsXMLFilePath&quot; value=&quot;UI.Package/GetStyleOptionsFromFile/BackgroundOptions.xml&quot; /&gt;&lt;/f:function&gt;&lt;/f:param&gt;&lt;/f:widgetfunction&gt;" />
+    </DataFieldDescriptor>
+    <DataFieldDescriptor id="db08774b-e6c4-4042-a2a3-c70cb2d31591" name="TextColor" isNullable="false" position="2" groupByPriority="0" inherited="false" instanceType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" storeType="PhysicalStoreType='String'Length='64'" isReadOnly="false" defaultValue="ValueType='String'Value=''">
+      <FormRenderingProfile label="Text Color" helpText="If none is selected, then default White color is used." widgetFunctionMarkup="&lt;f:widgetfunction xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Composite.Widgets.String.Selector&quot;&gt;&lt;f:param xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Options&quot;&gt;&lt;f:function xmlns:f=&quot;http://www.composite.net/ns/function/1.0&quot; name=&quot;Orckestra.Web.Html.GetStyleOptionsFromFile&quot;&gt;&lt;f:param name=&quot;OptionsXMLFilePath&quot; value=&quot;UI.Package/GetStyleOptionsFromFile/TextColorOptions.xml&quot; /&gt;&lt;/f:function&gt;&lt;/f:param&gt;&lt;/f:widgetfunction&gt;" />
+    </DataFieldDescriptor>
+  </Fields>
+</DataTypeDescriptor>
